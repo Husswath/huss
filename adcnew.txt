@@ -1,0 +1,551 @@
+am mod
+
+fm=2000;
+fc=20000;
+Ac=5;
+Am=5;
+m=1;
+ta=1/fm;
+t=0:ta/999:6*ta;
+mt=Am*cos(2*pi*fm*t);
+subplot(4,1,1);
+plot(t,mt);
+xlabel("time");
+ylabel("amplitude");
+title("message signal");
+ct=Ac*cos(2*pi*fc*t);
+subplot(4,1,2);
+plot(t,ct);
+xlabel("time");
+ylabel("amplitude");
+title("carrier signal");
+st=(Ac+m*mt).*cos(2*pi*fc*t);
+subplot(4,1,3);
+plot(t,st);
+xlabel("time");
+ylabel("amplitude");
+title("modulated signal");
+z=abs(Ac*(1+m*cos(2*pi*fm*t)));
+subplot(4,1,4);
+plot(t,z);
+xlabel("time");
+ylabel("amplitude");
+title("demodulated signal");
+pspectrum(st,40000000)
+axis([0 2 -220 10])
+
+
+
+
+
+
+fm mod
+
+
+fm=2000;
+fc = 5000;
+fs = 200000;
+mi=2;
+t = (0:1/fs:0.01);
+%t=0:0.001:0.1;
+m=sin(2*pi*fm*t);
+subplot(4,1,1);
+plot(t,m);
+xlabel('Time');
+ylabel('Amplitude');
+title('Message Signal');
+c=sin(2*pi*fc*t);
+subplot(4,1,2);
+plot(t,c);
+xlabel('Time');
+ylabel('Amplitude');
+title('Carrier Signal');
+y=sin(2*pi*fc*t+(mi.*sin(2*pi*fm*t)));
+subplot(4,1,3);
+plot(t,y);
+xlabel('Time');
+ylabel('Amplitude');
+title('FM Signal');
+y=diff(y);
+y=abs(y);
+subplot(4,1,4);
+[b,a]=butter(1,0.005);
+z=filter(b,a,y);
+z=10.*z;
+plot(z);
+xlabel('Time');
+ylabel('Amplitude');
+title('FM demodulation Signal');
+figure;
+pspectrum(y,fs);
+
+
+
+
+
+bpsk
+
+clc; clear all; close all;
+M=2;
+x=randi([0,M-1],1000,1);%[1,0,1,0,1,0,1,0,1,0];
+% a=zeros(1,length(x));
+y=[];
+for i = 1: length(x)
+    if x(i)==1
+        y(i)=-1;
+    else
+        y(i)=+1;
+    end
+end
+z=pskmod(x,M);
+snr=10;
+scatterplot(z)
+n=awgn(z,snr,"measured");
+scatterplot(n)
+m=[];
+for i=1:length(z)
+    if real(n(i))>0 
+         m(i)=0;
+    else
+        m(i)=1;
+    end
+end
+disp(m)
+br=0;
+for i=1:length(x)
+    if x(i)~=m(i)
+        br=br+1;
+    end
+end
+ber = br/length(x);
+disp(ber)
+% snr1 = 0:1:10;
+% br = zeros(1, length(snr1));
+% for j=1:length(snr1)
+%     
+%     n1=awgn(z,snr1(j),"measured");
+%     m=[];
+%     for i=1:length(x)
+%           if real(n1(i))>0 
+%              m(i)=0;
+%           else
+%              m(i)=1;
+%           end
+%     end
+%    
+%      
+%     for i=1:length(x)
+%          if x(i)~=m(i)
+%              br(j)=br(j)+1;
+%          end
+%      end
+%  end
+% ber = br/length(x);
+% disp(ber)
+% semilogy(snr1,ber)
+% xlabel('Signa to Noise Ratio (dB)');ylabel('Bit Error Rate(dB)');title('BER vs SNR')
+
+
+
+
+
+qpsk
+
+clc;clear all;close all;
+M = 4;
+x = randi([0,M-1],10000,1);
+% snr = 20;
+y = [];
+
+for j = 1: length(x)
+    if x(j) == 0
+        y(j) = (1+1i)*1/sqrt(2);
+    elseif x(j) == 1
+        y(j) = (-1+1i)*1/sqrt(2);
+    elseif x(j) == 2
+        y(j) = (-1-1i)*1/sqrt(2);
+    elseif x(j) == 3
+        y(j) = (1-1i)*1/sqrt(2);
+    end
+end
+scatterplot(y)
+n1 = awgn(y,15);
+scatterplot(n1)
+snr = 0:1:10;
+br = zeros(1,length(snr));
+
+for i = 1 : length(snr)
+    n = awgn(y,snr(i),"measured");
+    m = [];
+    for j = 1 : length(x)
+        if real(n(j))>0 && imag(n(j))>0
+            m(j) = 0;
+        elseif real(n(j))<0 && imag(n(j))>0
+            m(j) = 1;
+        elseif real(n(j))<0 && imag(n(j))<0
+            m(j) = 2;
+        elseif real(n(j))>0 && imag(n(j))<0
+            m(j) = 3;
+        end
+    end
+     for k = 1 : length(x)
+         if  x(k) ~= m(k)
+             br(i) = br(i) + 1;
+         end
+     end
+end
+ber = br/length(x);
+figure
+semilogy(snr,ber)
+
+
+
+
+pcm
+
+clc;clear all;close all;
+fm = 1000;fn = 1600;fc = 2000;
+fs = 15*fm;
+t = 0:1/fs:50/fm;
+a = 1;
+x = a*cos(2*pi*fm*t);
+% plot(x)
+N = 0:1:100;
+s = cos(2*pi*fm*N/fs);
+% stem(xn)
+b = 4;
+l = 2^b;
+d = 2*a/l;
+q = zeros(1,length(N));
+e = zeros(1,length(N));
+for i = 1 : length(N)
+    for j = 1 : l
+        if s(i)>-a+((j-1)*d) && s(i) <= (-a+(j*d))
+            q(i) = -a+((2*j-1)*(d/2)); % quantisation
+             e(i) = j-1; %encoding
+        end
+    end
+end
+
+de = zeros(1,length(N));
+
+for i = 1 :length(e)
+    for j = 0 : l-1
+         if e(i) == j
+             de(i) = -a+((2*j+1)*(d/2));
+         end
+     end
+end
+
+figure
+subplot(2,2,1);
+stem(s);title('Sampled signal');xlabel('sample no');ylabel('amplitude')
+subplot(2,2,2);
+stem(q);title('Quantised signal');xlabel('sample no');ylabel('amplitude')
+subplot(2,2,3);
+stem(e);title('Encoded signal');xlabel('sample no');ylabel('amplitude')
+subplot(2,2,4);
+stem(de);title('Decoded signal');xlabel('sample no');ylabel('amplitude')
+
+
+wp = 2*pi*fm/fs;
+ws = 2*pi*fc/fs;
+wn = 2*pi*fn/fs;
+tw = wn-wp;
+M = ceil(8*pi/tw);
+
+wpn = wp/pi; wsn = ws/pi; wnn = wn/pi;
+Rp = 1; Rs = 40;
+
+h = fir1(M-1,wnn,"low",hamming (M),"scale");
+b = h;
+% bn = sum(abs(b));
+% B= b/bn;
+
+y = filter(b,1,x);
+
+figure
+subplot(2,2,1)
+plot(x);title('Input signal');xlabel('time');ylabel('amplitude')
+subplot(2,2,3)
+plot(y);title('Output signal');xlabel('time');ylabel('amplitude')
+subplot(2,2,2)
+pspectrum(x,fs,"power");axis([0 2 -220 10])
+subplot(2,2,4)
+pspectrum(y,fs,"power");axis([0 2 -180 10])
+
+
+
+
+
+
+
+linecoding
+
+clc;clear all;
+%x = randi([0,1],10,1);
+bits = [0,1,1,0,1,0,0,1];
+bitrate = 1;
+
+T = length(bits)/bitrate; % full time of bit sequence
+n = 100;
+N = n*length(bits);
+dt = T/N;
+t = 0:dt:T;fm1 = 1/dt;fs1 = 10*fm1; fm2=2/dt;fs2=10*fm2;
+ unrz = zeros(1,length(t)); 
+% unipolar NRZ
+for i = 0:length(bits)-1
+  if bits(i+1) == 1
+    unrz(i*n+1:(i+1)*n) = 1;
+  else
+    unrz(i*n+1:(i+1)*n) = 0;
+  end
+end
+% plot(t,unrz);xlabel('t');ylabel('amplitude')
+% pspectrum(unrz,fs1)
+
+% % Unipolar RZ
+% urz = zeros(1,length(t)); 
+% for i = 0:length(bits)-1
+%   if bits(i+1) == 1
+%     urz(i*n+1:(i+0.5)*n) = 1;
+%     urz((i+0.5)*n+1:(i+1)*n) = 0;
+%   else
+%     urz(i*n+1:(i+1)*n) = 0;
+%   end
+% end
+% 
+% figure
+% plot(t,urz);xlabel('t');ylabel('amplitude')
+% figure
+% pspectrum(urz,t)
+
+ %Polar NRZ
+%  pnrz = zeros(1,length(t)); 
+%  for i = 0:length(bits)-1
+%    if bits(i+1) == 1
+%      pnrz(i*n+1:(i+1)*n) = 1;
+%  
+%    else
+%      pnrz(i*n+1:(i+1)*n) = -1;
+%  
+%    end
+%  end
+%  figure
+%  plot(t,pnrz);xlabel('t');ylabel('amplitude')
+%  figure
+%  pspectrum(pnrz,fs1)
+
+% Polar RZ
+% prz = zeros(1,length(t)); 
+% for i = 0:length(bits)-1
+%    if bits(i+1) == 1
+%      prz(i*n+1:(i+0.5)*n) = 1;
+%     prz((i+0.5)*n+1:(i+1)*n) = 0;
+%   else
+%     prz(i*n+1:(i+0.5)*n) = -1;
+%     prz((i+0.5)*n+1:(i+1)*n) = 0;
+%    end
+%  end
+%  figure
+%  plot(t,prz);xlabel('t');ylabel('amplitude')
+%  figure
+%  pspectrum(prz,t)
+
+% Manchester
+% man = zeros(1,length(t)); 
+% for i = 0:length(bits)-1
+%    if bits(i+1) == 1
+%       man(i*n+1:(i+0.5)*n) = 1;
+%      man((i+0.5)*n+1:(i+1)*n) = -1;
+%    else
+%      man(i*n+1:(i+0.5)*n) = -1;
+%      man((i+0.5)*n+1:(i+1)*n) = 1;
+%    end
+% end
+figure
+ 
+ subplot(121),
+ plot(t,unrz);xlabel('t');ylabel('amplitude')
+ subplot(122)
+ pspectrum(unrz,t)
+
+
+
+
+
+
+hamming
+
+clc;clear;close all;
+n = 7 ; k = 4;  
+x = randi([0,1],10^6,1);
+X = reshape(x,length(x)/4,4);
+I = eye(k);
+P = [1,1,0;0,1,1;1,1,1;1,0,1];
+Pt = transpose(P);
+G = [P I];
+C = mod(X*G,2); M = 2;
+b1 = pskmod(x,M); b = pskmod(C,M);
+snr = 0:1:100;
+br = zeros(1,length(snr));
+br1 = zeros(1,length(snr));
+
+for j = 1 : length(snr)
+    
+    d = awgn(b,snr(j),"measured");
+    d1 = awgn(b1,snr(j),"measured");
+    m  = pskdemod(d,M);
+    m1 = pskdemod(d1,M);
+
+    H = [eye(n-k) Pt];
+    Ht = transpose(H);
+    S = mod(m*Ht,2);
+    t = syndtable(H);
+    s = bit2int(S',3,true);
+    row = t(s+1,:);
+    r = mod(row+m,2);
+    msg = r(:,4:end);
+    br(j) = biterr(X,msg);
+    br1(j) = biterr(x,m1);
+
+end
+
+ber1 = br1/length(x);
+ber = br/length(x);
+semilogy(snr,ber);
+hold on
+semilogy(snr,ber1);
+legend('Hamming','bpsk');
+grid on;
+xlabel("SNR(in dB)");ylabel("Bit Error Rate")
+title("BER vs SNR")
+
+
+
+
+
+
+
+
+pn sequence
+
+clc;clear all;close all;
+a = 1;
+b = 0;
+c = 0;
+d=1;
+pn  = [];
+for i = 1:7
+    pn = [pn,d];
+    d = c;
+    c = b;
+    b = a;
+    a = xor(d,c);
+   
+end
+t1 = 0.001428571:0.001428571:7;
+r = [1 1 0 0 1 0 1];
+for i = 1:7
+    if(r(i)==0)
+        r(i)=-1;
+    end
+    if(pn(i)==0)
+        pn(i)=-1;
+    end
+end
+pn1=[];
+for i=1:length(r)
+    if(r(i)==1)
+        pn1=[pn1 pn];
+    else
+        pn1=[pn1 -pn];
+    end
+end
+
+msg = [];
+for i = 1: length(r)
+    if r(i) == 1
+        msg = [msg,ones(1,700)];
+    else
+        msg = [msg,zeros(1,700)];
+    end
+end
+chip=[];
+for i = 1: length(pn)
+    if pn(i) == 1
+        chip = [chip,ones(1,700)];
+    else
+        chip = [chip,-ones(1,700)];
+    end
+end
+dss = [];
+for i = 1: length(pn1)
+    if pn1(i) == 1
+        dss = [dss,ones(1,100)];
+    else
+        dss = [dss,-ones(1,100)];
+    end
+end
+
+subplot(5,1,1);
+plot(t1,msg);xlabel('time in sec');ylabel('amplitude');title('Message sequene');
+subplot(5,1,2);
+plot(t1,chip);xlabel('time in sec');ylabel('amplitude');title('Pseudo Noise sequence');
+subplot(5,1,3);
+plot(t1,dss);xlabel('time in sec');ylabel('amplitude');title('DSS');
+
+chan = awgn(pn1,5);
+z = [];
+for i=1:7
+    pn2 = chan(7*(i-1)+1 : 7*i);
+    z1 = pn2*pn';
+    z = [z,z1];
+end
+for i=1:length(z)
+    if(z(i)<0)
+        z(i)=-1;
+    else
+        z(i)=1;
+    end
+end
+out=[];
+for i = 1: length(z)
+    if z(i) == 1
+        out = [out,ones(1,700)];
+    else
+        out = [out,-ones(1,700)];
+    end
+end
+subplot(514);
+plot(t1,awgn(dss,5));xlabel('time in sec');ylabel('amplitude');title('Received signal');
+subplot(515);
+plot(t1,out);xlabel('time in sec');ylabel('amplitude');title('Recovered signal');
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
