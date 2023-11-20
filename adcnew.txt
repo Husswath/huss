@@ -83,6 +83,8 @@ pspectrum(y,fs);
 
 
 
+
+
 bpsk
 
 clc; clear all; close all;
@@ -149,6 +151,8 @@ disp(ber)
 
 
 
+
+
 qpsk
 
 clc;clear all;close all;
@@ -197,6 +201,9 @@ end
 ber = br/length(x);
 figure
 semilogy(snr,ber)
+
+
+
 
 
 
@@ -273,6 +280,7 @@ subplot(2,2,2)
 pspectrum(x,fs,"power");axis([0 2 -220 10])
 subplot(2,2,4)
 pspectrum(y,fs,"power");axis([0 2 -180 10])
+
 
 
 
@@ -369,6 +377,9 @@ figure
  plot(t,unrz);xlabel('t');ylabel('amplitude')
  subplot(122)
  pspectrum(unrz,t)
+
+
+
 
 
 
@@ -525,6 +536,68 @@ plot(t1,out);xlabel('time in sec');ylabel('amplitude');title('Recovered signal')
 
 
 
+
+
+
+
+
+delta mod
+
+clc;        
+clear all;  
+close all;  
+
+Am = 2;
+fm = 4;
+fs = 250;
+
+Tm = 1/fs;
+t = 0: Tm : 1;
+Ym = Am*cos(2*pi*fm*t); %% msg signal 
+subplot(3,1,1);
+plot(Ym);
+title("Message Signal");
+xlabel("Time (sec)");
+ylabel("Amplitude");
+
+
+
+l = length(Ym);
+delta = 0.3;
+Yn=zeros(1,l);       %% Delta modulated signal
+for i=1:l
+if Ym(i)>Yn(i)
+d(i)=1;
+Yn(i+1) = Yn(i) + delta;
+else
+d(i)=0; 
+Yn(i+1) = Yn(i) - delta;
+end
+end
+subplot(3,1,2);
+stairs(Yn);     
+title("Delta Modulated Signal");
+xlabel("Time (sec)");
+ylabel("Amplitude");
+
+figure
+stairs(Yn)
+hold on
+plot(Ym)
+
+Yd = zeros(1,l);
+for i = 1 : l
+if d(i) > 0
+Yn(i+1) = Yn(i) - delta;
+else 
+Yn(i+1) = Yn(i) + delta;
+end
+end
+figure
+plot(Yn);     
+title("DeModulated Signal");
+xlabel("Time (sec)");
+ylabel("Amplitude");
 
 
 
